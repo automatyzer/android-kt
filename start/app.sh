@@ -1,6 +1,6 @@
 #!/bin/bash
-
-# Android App Startup Script
+# start/app.sh
+# Gradle Wrapper Regeneration Script
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -21,208 +21,97 @@ print_error() {
     echo -e "${RED}[✗]${NC} $1"
 }
 
-# Detect Android SDK and Tools
-detect_android_sdk() {
-    # Common SDK locations
-    SDK_LOCATIONS=(
-        "$ANDROID_HOME"
-        "$HOME/Android/Sdk"
-        "$HOME/android-sdk"
-        "/opt/android-sdk"
-    )
+# Validate Gradle Installation
+validate_gradle() {
+    # Check if Gradle is installed
+    if ! command -v gradle &> /dev/null; then
+        print_error "Gradle is not installed. Installing Gradle..."
 
-    for location in "${SDK_LOCATIONS[@]}"; do
-        if [ -d "$location" ] && [ -d "$location/emulator" ] && [ -d "$location/platform-tools" ]; then
-            export ANDROID_HOME="$location"
-            export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
-            print_status "Android SDK found at $ANDROID_HOME"
-            return 0
+        # Attempt to install Gradle
+        if command -v sdk &> /dev/null; then
+            sdk install gradle
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install gradle -y
+        else
+            print_error "Unable to install Gradle. Please install manually."
+            return 1
         fi
-    done
-
-    print_error "Android SDK not found. Please install Android Studio or set ANDROID_HOME"
-    return 1
-}
-
-# Prepare Android Emulator
-prepare_emulator() {
-    echo "Checking for available Android emulators..."
-
-    # Ensure emulator command is available
-    if ! command -v emulator &> /dev/null; then
-        print_error "Android emulator command not found"
-        return 1
     fi
 
-    # List available emulators
-    EMULATORS=$(emulator -list-avds)
-
-    if [ -z "$EMULATORS" ]; then
-        print_error "No Android emulators found. Create an emulator using Android Studio AVD Manager."
-        return 1
-    fi
-
-    echo "Available emulators:"
-    echo "$EMULATORS"
-
-    # Select first available emulator
-    SELECTED_EMULATOR=$(echo "$EMULATORS" | head -n 1)
-
-    if [ -z "$SELECTED_EMULATOR" ]; then
-        print_error "Could not select an emulator"
-        return 1
-    fi
-
-    print_status "Selected emulator: $SELECTED_EMULATOR"
+    print_status "Gradle is installed"
     return 0
 }
 
-# Start Android Emulator
-start_emulator() {
-    if ! prepare_emulator; then
-        print_warning "Skipping emulator startup"
-        return 1
-    fi
+# Regenerate Gradle Wrapper
+regenerate_gradle_wrapper() {
+    local GRADLE_VERSION="8.5"
 
-    echo "Starting Android Emulator: $SELECTED_EMULATOR"
+    # Ensure we're in the project root
+    cd "$(dirname "$0")/.." || exit 1
 
-    # Kill any existing emulator instances
-    pkill -f "qemu-system-x86_64"
+    # Remove existing Gradle wrapper if it exists
+    rm -f gradlew gradlew.bat
+    rm -rf gradle/wrapper
 
-    # Start emulator in background with verbose logging
-    emulator -avd "$SELECTED_EMULATOR" -no-snapshot-load -no-audio &
+    # Create Gradle wrapper directories
+    mkdir -p gradle/wrapper
 
-    # Emulator boot wait function
-    wait_for_emulator() {
-        local bootcheck=0
-        local timeout=300  # 5 minutes
-        local interval=5
-
-        while [ $bootcheck -lt $timeout ]; do
-            if adb shell "getprop sys.boot_completed" 2>/dev/null | grep -q "1"; then
-                return 0
-            fi
-            sleep $interval
-            bootcheck=$((bootcheck + interval))
-        done
-        return 1
-    }
-
-    # Wait for emulator to boot
-    echo "Waiting for emulator to boot..."
-
-    if wait_for_emulator; then
-        print_status "Emulator booted successfully"
-        return 0
-    else
-        print_error "Emulator failed to boot within 5 minutes"
-        return 1
-    fi
-}
-
-# Check Prerequisites
-check_prerequisites() {
-    # Check Java
-    if ! command -v java &> /dev/null; then
-        print_error "Java is not installed"
-        return 1
-    fi
-
-    # Detect Android SDK
-    if ! detect_android_sdk; then
-        return 1
-    fi
-
-    # Check Gradle
-    if ! command -v gradle &> /dev/null && [ ! -x ./gradlew ]; then
-        print_error "Gradle is not installed and gradlew is not executable"
-        return 1
-    fi
-
-    return 0
-}
-
-# Build and Install App
-build_and_install() {
-    echo "Building and installing the app..."
-
-    # Use Gradle wrapper for consistent builds
-    if [ -x ./gradlew ]; then
-        # Clean and build the project
-        ./gradlew clean build
-
-        if [ $? -ne 0 ]; then
-            print_error "Project build failed"
-            return 1
-        fi
-
-        # Install debug variant to connected device/emulator
-        ./gradlew :app:installDebug
-
-        if [ $? -ne 0 ]; then
-            print_error "App installation failed"
-            return 1
-        fi
-    else
-        print_error "Gradle wrapper not found or not executable"
-        return 1
-    fi
-}
-
-# Run the App
-run_app() {
-    echo "Launching the app..."
-
-    # Get package name from app/build.gradle
-    PACKAGE_NAME=$(grep "applicationId" app/build.gradle | awk -F '"' '{print $2}')
-
-    if [ -z "$PACKAGE_NAME" ]; then
-        print_error "Could not determine app package name"
-        return 1
-    fi
-
-    # Start the app
-    adb shell am start -n "$PACKAGE_NAME/.MainActivity"
+    # Regenerate Gradle wrapper
+    echo "Regenerating Gradle wrapper..."
+    gradle wrapper --gradle-version=$GRADLE_VERSION
 
     if [ $? -eq 0 ]; then
-        print_status "App launched"
+        print_status "Gradle wrapper regenerated successfully"
+
+        # Ensure wrapper is executable
+        chmod +x gradlew
+        print_status "Gradle wrapper made executable"
     else
-        print_error "Failed to launch app"
+        print_error "Failed to regenerate Gradle wrapper"
+        return 1
+    fi
+}
+
+# Verify Gradle Wrapper
+verify_gradle_wrapper() {
+    # Check if gradlew exists and is executable
+    if [ -x ./gradlew ]; then
+        print_status "Gradle wrapper is present and executable"
+
+        # Display Gradle version
+        ./gradlew --version
+    else
+        print_error "Gradle wrapper is missing or not executable"
         return 1
     fi
 }
 
 # Main execution
 main() {
-    echo "Starting Android App Development Environment"
+    echo "Starting Gradle Wrapper Regeneration"
 
-    # Change to project root directory
-    cd "$(dirname "$0")/.." || exit 1
-
-    # Check prerequisites
-    if ! check_prerequisites; then
-        print_error "Prerequisites check failed"
+    # Validate Gradle installation
+    if ! validate_gradle; then
+        print_error "Gradle validation failed"
         exit 1
     fi
 
-    # Start emulator (optional)
-    if ! start_emulator; then
-        print_warning "Emulator startup failed. Attempting to continue with connected device."
-    fi
-
-    # Build and install app
-    if ! build_and_install; then
-        print_error "Build or installation failed"
+    # Regenerate Gradle wrapper
+    if ! regenerate_gradle_wrapper; then
+        print_error "Gradle wrapper regeneration failed"
         exit 1
     fi
 
-    # Run the app
-    if ! run_app; then
-        print_error "Failed to run the app"
+    # Verify Gradle wrapper
+    if ! verify_gradle_wrapper; then
+        print_error "Gradle wrapper verification failed"
         exit 1
     fi
 
-    echo -e "${GREEN}Android App Startup Complete!${NC}"
+    echo -e "${GREEN}Gradle Wrapper Regeneration Complete!${NC}"
+    echo "Next steps:"
+    echo "1. Run './gradlew build' to verify"
+    echo "2. Sync project in Android Studio"
 }
 
 # Run the main function

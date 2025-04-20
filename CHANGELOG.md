@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - 2025-04-20
+
+### Added
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/AnalyticsScreen.kt
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/AnalyticsViewModel.kt
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/GenerateReportUseCase.kt
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/OptimizeStrategyUseCase.kt
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/ReportViewModel.kt
+- Changes in app/java/com/businessprospector/domain/usecase/analysis/TrackResponseUseCase.kt
+- Changes in app/src/main/java/com/example/androidkt/MainActivity.kt
+- Changes in app/src/main/res/layout/activity_main.xml
+- Changes in app/src/main/res/values/colors.xml
+- Changes in app/src/main/res/values/strings.xml
+- Changes in app/src/main/res/values/themes.xml
+- Changes in gradle.properties
+
 ## [0.1.7] - 2025-04-20
 
 ## [0.1.6] - 2025-04-20

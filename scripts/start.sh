@@ -17,3 +17,4 @@ fi
 cd "$(dirname "$0")/.."
 
 ./gradlew :app:installDebug
+./gradlew build
