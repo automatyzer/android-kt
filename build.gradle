@@ -1,30 +1,62 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file for project-wide configurations
+
 buildscript {
     ext {
-        // Define version variables for easier management
-        kotlin_version = "1.9.22"
-        nav_version = "2.7.7"
-        gradle_version = "8.2.2"
+        // Version management for key libraries
+        kotlin_version = '1.9.24'
+        android_gradle_plugin_version = '8.2.2'
+        hilt_version = '2.48.1'
+        navigation_version = '2.7.6'
+        compose_compiler_version = '1.5.1'
     }
 
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
 
     dependencies {
+        classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
-        classpath "com.android.tools.build:gradle:$gradle_version"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
     }
 }
 
+// Direct plugin management
 plugins {
-    id 'com.android.application' version '8.2.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
-    id 'androidx.navigation.safeargs.kotlin' version '2.7.7' apply false
+    // Use the exact plugin version from the classpath
+    id 'com.android.application' version "" apply false
+    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+    id 'com.google.dagger.hilt.android' version "$hilt_version" apply false
+    id 'androidx.navigation.safeargs.kotlin' version "$navigation_version" apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
+}
+
+// Configure global settings for Java compatibility
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+
+            project.android.kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+    }
 }

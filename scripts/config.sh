@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Gradle Configuration Diagnostic and Fix Script
+# Gradle and Java Compatibility Diagnostic Script
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -21,173 +21,204 @@ print_error() {
     echo -e "${RED}[✗]${NC} $1"
 }
 
-# Check and update Gradle configuration
-update_gradle_config() {
+# Check Java Version
+check_java_version() {
+    echo "Checking Java Version..."
+    java -version
+    JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+
+    # Extract major version number
+    MAJOR_VERSION=$(echo "$JAVA_VERSION" | cut -d. -f1)
+
+    echo "Java Major Version: $MAJOR_VERSION"
+    return 0
+}
+
+# Check Gradle Version
+check_gradle_version() {
+    echo "Checking Gradle Version..."
+    gradle --version
+}
+
+# Update Gradle Wrapper
+update_gradle_wrapper() {
+    echo "Updating Gradle Wrapper..."
+
+    # Determine the appropriate Gradle version for Java 21
+    GRADLE_VERSION="8.2.2"
+
+    # Create or update gradle-wrapper.properties
+    WRAPPER_PROPS="gradle/wrapper/gradle-wrapper.properties"
+
+    if [ ! -f "$WRAPPER_PROPS" ]; then
+        mkdir -p gradle/wrapper
+    fi
+
+    # Update wrapper properties
+    cat > "$WRAPPER_PROPS" << EOL
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOL
+
+    # Update the Gradle wrapper
+    ./gradlew wrapper --gradle-version=$GRADLE_VERSION
+
+    print_status "Gradle Wrapper updated to version $GRADLE_VERSION"
+}
+
+# Create Settings Gradle
+create_settings_gradle() {
+    SETTINGS_GRADLE="settings.gradle"
+
+    cat > "$SETTINGS_GRADLE" << EOL
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex "com\\.android.*"
+                includeGroupByRegex "com\\.google.*"
+                includeGroupByRegex "androidx.*"
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = 'android-kt'
+include ':app'
+EOL
+
+    print_status "Created comprehensive settings.gradle"
+}
+
+# Update build.gradle for Java compatibility
+update_build_gradle() {
     # Top-level build.gradle
-    TOP_LEVEL_GRADLE="build.gradle"
-    TOP_LEVEL_BACKUP="build.gradle.backup"
+    TOP_GRADLE="build.gradle"
 
-    # App module build.gradle
-    APP_GRADLE="app/build.gradle"
-    APP_BACKUP="app/build.gradle.backup"
+    # Backup existing file
+    cp "$TOP_GRADLE" "${TOP_GRADLE}.backup"
 
-    # Create backups
-    if [ -f "$TOP_LEVEL_GRADLE" ]; then
-        cp "$TOP_LEVEL_GRADLE" "$TOP_LEVEL_BACKUP"
-        print_status "Created backup of top-level build.gradle"
-    fi
+    # Update build.gradle
+    cat > "$TOP_GRADLE" << EOL
+// Top-level build file for project-wide configurations
 
-    if [ -f "$APP_GRADLE" ]; then
-        cp "$APP_GRADLE" "$APP_BACKUP"
-        print_status "Created backup of app module build.gradle"
-    fi
-
-    # Create/update top-level build.gradle
-    cat > "$TOP_LEVEL_GRADLE" << EOL
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        // Define version variables for easier management
-        kotlin_version = "1.9.22"
-        nav_version = "2.7.7"
-        gradle_version = "8.2.2"
+        // Version management for key libraries
+        kotlin_version = '1.9.24'
+        android_gradle_plugin_version = '8.2.2'
+        hilt_version = '2.48.1'
+        navigation_version = '2.7.6'
+        compose_compiler_version = '1.5.1'
     }
 
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
 
     dependencies {
+        classpath "com.android.tools.build:gradle:\$android_gradle_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:\$kotlin_version"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:\$nav_version"
-        classpath "com.android.tools.build:gradle:\$gradle_version"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:\$hilt_version"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:\$navigation_version"
     }
 }
 
+// Direct plugin management
 plugins {
-    id 'com.android.application' version '8.2.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
-    id 'androidx.navigation.safeargs.kotlin' version '2.7.7' apply false
+    // Use the exact plugin version from the classpath
+    id 'com.android.application' version "${android_gradle_plugin_version}" apply false
+    id 'org.jetbrains.kotlin.android' version "\$kotlin_version" apply false
+    id 'com.google.dagger.hilt.android' version "\$hilt_version" apply false
+    id 'androidx.navigation.safeargs.kotlin' version "\$navigation_version" apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
-EOL
 
-    # Create/update app module build.gradle
-    cat > "$APP_GRADLE" << EOL
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'androidx.navigation.safeargs.kotlin'
-}
+// Configure global settings for Java compatibility
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
 
-android {
-    namespace 'com.example.androidkt'
-    compileSdk 34
-
-    defaultConfig {
-        applicationId "com.example.androidkt"
-        minSdk 24
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            debuggable true
+            project.android.kotlinOptions {
+                jvmTarget = '17'
+            }
         }
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
-    buildFeatures {
-        viewBinding true
-        dataBinding true
-    }
-}
-
-dependencies {
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.22"
-
-    // AndroidX Core
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-
-    // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:2.7.7"
-    implementation "androidx.navigation:navigation-ui-ktx:2.7.7"
-
-    // Lifecycle
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
-
-    // Testing
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 EOL
 
-    print_status "Updated Gradle configuration files"
+    print_status "Updated top-level build.gradle for Java compatibility"
 }
 
-# Clean and rebuild Gradle project
-rebuild_project() {
-    echo "Cleaning and rebuilding project..."
+# Cleanup Gradle Caches
+cleanup_gradle_caches() {
+    echo "Cleaning Gradle Caches..."
 
-    # Clean Gradle caches
-    ./gradlew clean
+    # Stop running Gradle daemons
+    ./gradlew --stop
 
-    # Rebuild project
-    ./gradlew build
+    # Remove Gradle caches
+    rm -rf ~/.gradle/caches/
 
-    # Check build status
-    if [ $? -eq 0 ]; then
-        print_status "Project rebuilt successfully"
-    else
-        print_error "Project rebuild failed"
-        return 1
-    fi
+    print_status "Gradle caches cleaned"
 }
 
 # Main execution
 main() {
-    echo "Starting Gradle Configuration Diagnostic and Fix"
+    echo "Starting Gradle Compatibility Diagnostic and Fix"
 
-    # Update Gradle configuration
-    update_gradle_config
+    # Check current Java and Gradle versions
+    check_java_version
+    check_gradle_version
 
-    # Rebuild project
-    if ! rebuild_project; then
-        print_error "Failed to rebuild project"
-        exit 1
-    fi
+    # Create comprehensive settings.gradle
+    create_settings_gradle
 
-    echo -e "${GREEN}Gradle Configuration Diagnostic and Fix Complete!${NC}"
+    # Update Gradle wrapper
+    update_gradle_wrapper
+
+    # Update build.gradle
+    update_build_gradle
+
+    # Cleanup Gradle caches
+    cleanup_gradle_caches
+
+    # Sync project
+    ./gradlew clean
+
+    echo -e "${GREEN}Gradle Compatibility Diagnostic and Fix Complete!${NC}"
     echo "Next steps:"
-    echo "1. Review the updated build.gradle files"
-    echo "2. Run './gradlew :app:installDebug' to install the app"
+    echo "1. Review the updated Gradle configuration"
+    echo "2. Sync project in Android Studio"
+    echo "3. Rebuild the project"
 }
 
 # Run the main function
