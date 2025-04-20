@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 2025-04-20
+
+### Added
+- Changes in app/java/com/businessprospector/ui/analytics/AnalyticsScreen.kt
+- Changes in app/java/com/businessprospector/ui/analytics/AnalyticsViewModel.kt
+
 ## [0.1.2] - 2025-04-20
 
 ### Added

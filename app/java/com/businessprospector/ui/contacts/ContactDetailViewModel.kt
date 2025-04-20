@@ -1,52 +1,145 @@
 package com.businessprospector.ui.contacts
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.businessprospector.data.repository.ContactRepository
+import com.businessprospector.data.repository.CommunicationRepository
 import com.businessprospector.domain.model.Contact
-import com.businessprospector.ui.common.components.LoadingIndicator
+import com.businessprospector.domain.model.Message
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class ContactDetailViewModel @Inject constructor(
+    private val contactRepository: ContactRepository,
+    private val communicationRepository: CommunicationRepository
+) : ViewModel() {
+
+    private val _contactState = MutableStateFlow<Contact?>(null)
+    val contactState: StateFlow<Contact?> = _contactState
+
+    private val _messagesState = MutableStateFlow<List<Message>>(emptyList())
+    val messagesState: StateFlow<List<Message>> = _messagesState
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun loadContact(contactId: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            try {
+                // Załaduj dane kontaktu
+                val contact = contactRepository.getContactById(contactId)
+                if (contact != null) {
+                    _contactState.value = contact
+
+                    // Załaduj historię wiadomości
+                    loadMessages(contactId)
+                } else {
+                    _error.value = "Contact not found"
+                }
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to load contact"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun loadMessages(contactId: Long) {
+        viewModelScope.launch {
+            try {
+                communicationRepository.getMessagesForContact(contactId)
+                    .catch { e ->
+                        _error.value = e.message ?: "Failed to load messages"
+                    }
+                    .collectLatest { messages ->
+                        _messagesState.value = messages
+                    }
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to load messages"
+            }
+        }
+    }
+
+    fun updateContactStatus(newStatus: String) {
+        val contactId = _contactState.value?.id ?: return
+
+        viewModelScope.launch {
+            try {
+                contactRepository.updateContactStatus(contactId, newStatus)
+
+                // Odśwież dane kontaktu
+                val updatedContact = contactRepository.getContactById(contactId)
+                _contactState.value = updatedContact
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to update contact status"
+            }
+        }
+    }
+
+    fun deleteContact() {
+        val contact = _contactState.value ?: return
+
+        viewModelScope.launch {
+            try {
+                contactRepository.deleteContact(contact)
+                // Nie trzeba nic robić - nawigacja do poprzedniego ekranu jest obsługiwana w UI
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to delete contact"
+            }
+        }
+    }
+
+    fun sendEmail(subject: String, content: String) {
+        val contact = _contactState.value ?: return
+
+        viewModelScope.launch {
+            try {
+                communicationRepository.sendEmail(contact, subject, content)
+                // Odśwież historię wiadomości
+                loadMessages(contact.id)
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to send email"
+            }
+        }
+    }
+
+    fun sendSms(content: String) {
+        val contact = _contactState.value ?: return
+
+        viewModelScope.launch {
+            try {
+                communicationRepository.sendSms(contact, content)
+                // Odśwież historię wiadomości
+                loadMessages(contact.id)
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to send SMS"
+            }
+        }
+    }
+
+    fun makeCall(script: String) {
+        val contact = _contactState.value ?: return
+
+        viewModelScope.launch {
+            try {
+                communicationRepository.makeCall(contact, script)
+                // Odśwież historię wiadomości
+                loadMessages(contact.id)
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to prepare call"
+            }
+        }
+    }
+}
