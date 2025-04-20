@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2025-04-20
+
+### Added
+- Changes in app/java/com/businessprospector/data/local/converter/DataConverter.kt
+- Changes in app/java/com/businessprospector/domain/Model.kt
+- Changes in app/java/com/businessprospector/ui/common/components/EmptyState.kt
+- Changes in app/java/com/businessprospector/ui/common/components/ErrorMessage.kt
+- Changes in app/java/com/businessprospector/ui/common/components/LoadingIndicator.kt
+- Changes in app/java/com/businessprospector/ui/search/SearchScreen.kt
+- Changes in app/java/com/businessprospector/ui/search/SearchViewModel.kt
+
 ## [0.1.1] - 2025-04-20
 
 ### Added
