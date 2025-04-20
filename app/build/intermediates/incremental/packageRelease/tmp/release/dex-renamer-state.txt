@@ -1,0 +1,7 @@
+#Sun Apr 20 12:55:10 CEST 2025
+base.0=/home/tom/github/automatyzer/android-kt/app/build/intermediates/dex/release/mergeDexRelease/classes.dex
+base.1=/home/tom/github/automatyzer/android-kt/app/build/intermediates/dex/release/mergeDexRelease/classes2.dex
+path.0=classes.dex
+path.1=classes2.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex

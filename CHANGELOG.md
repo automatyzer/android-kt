@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.10] - 2025-04-20
+
+### Added
+- Changes in START.md
+- Changes in app/build/generated/ap_generated_sources/debug/out/androidx/databinding/DataBinderMapperImpl.java
+- Changes in app/build/generated/ap_generated_sources/debug/out/androidx/databinding/DataBindingComponent.java
+- Changes in app/build/generated/ap_generated_sources/debug/out/androidx/databinding/library/baseAdapters/BR.java
+- Changes in app/build/generated/ap_generated_sources/debug/out/com/example/androidkt/BR.java
+- Changes in app/build/generated/ap_generated_sources/debug/out/com/example/androidkt/DataBinderMapperImpl.java
+- Changes in local.properties
+
 ## [0.1.9] - 2025-04-20
 
 ## [0.1.8] - 2025-04-20

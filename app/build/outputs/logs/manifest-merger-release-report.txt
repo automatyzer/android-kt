@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-22:12
-INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-22:12
-INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-22:12
-INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-22:12
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:1-19:12
 MERGED from [androidx.databinding:databinding-adapters:8.2.2] /home/tom/.gradle/caches/transforms-3/ec37fa0e877d3bd5a0100e9a1feb86cd/transformed/databinding-adapters-8.2.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.databinding:databinding-ktx:8.2.2] /home/tom/.gradle/caches/transforms-3/8ca54b1b6ef0ec239567ee2f9a8b059a/transformed/jetified-databinding-ktx-8.2.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.databinding:databinding-runtime:8.2.2] /home/tom/.gradle/caches/transforms-3/25436aac4431933170f3fa6f820a3fcd/transformed/databinding-runtime-8.2.2/AndroidManifest.xml:2:1-7:12
@@ -68,7 +68,6 @@ MERGED from [androidx.documentfile:documentfile:1.0.0] /home/tom/.gradle/caches/
 MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/tom/.gradle/caches/transforms-3/5e1dc29fb2f228701b37755aabaab733/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.print:print:1.0.0] /home/tom/.gradle/caches/transforms-3/b7f96672ced5bb312585c27f215863d5/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
 	package
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:3:11-42
 		INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml
 	android:versionName
 		INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml
@@ -77,8 +76,8 @@ MERGED from [androidx.print:print:1.0.0] /home/tom/.gradle/caches/transforms-3/b
 	xmlns:android
 		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:2:11-69
 application
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:5:5-20:19
-INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:5:5-20:19
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:4:5-17:19
+INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:4:5-17:19
 MERGED from [com.google.android.material:material:1.11.0] /home/tom/.gradle/caches/transforms-3/761509af2d195e6a2dc9a5bf91298a5a/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] /home/tom/.gradle/caches/transforms-3/761509af2d195e6a2dc9a5bf91298a5a/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/tom/.gradle/caches/transforms-3/07861f8ca94332de175e463dcf4938ce/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -102,33 +101,29 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/tom/.gradle/caches/tr
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] /home/tom/.gradle/caches/transforms-3/55cd87e9a744ee9ee4574237736cf099/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:10:13-39
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:7:13-39
 	android:label
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:8:13-45
-	android:roundIcon
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:9:13-58
-	android:icon
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:7:13-47
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:6:13-45
 	android:allowBackup
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:6:13-39
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:5:13-39
 	android:theme
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:11:13-51
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:8:13-51
 activity#com.example.androidkt.MainActivity
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:12:9-19:20
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:9:9-16:20
 	android:exported
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:14:17-40
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:11:17-40
 	android:name
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:13:17-45
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:10:17-45
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:15:13-18:29
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:12:13-15:29
 action#android.intent.action.MAIN
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:16:17-69
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:13:17-69
 	android:name
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:16:25-66
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:13:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:17:17-77
+ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:14:17-77
 	android:name
-		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:17:27-74
+		ADDED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml:14:27-74
 uses-sdk
 INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/tom/github/automatyzer/android-kt/app/src/main/AndroidManifest.xml
