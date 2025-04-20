@@ -52,7 +52,7 @@ prepare_emulator() {
     if ! command -v emulator &> /dev/null; then
         print_error "Android emulator command not found"
         return 1
-    }
+    fi
 
     # List available emulators
     EMULATORS=$(emulator -list-avds)
@@ -92,20 +92,26 @@ start_emulator() {
     # Start emulator in background with verbose logging
     emulator -avd "$SELECTED_EMULATOR" -no-snapshot-load -no-audio &
 
+    # Emulator boot wait function
+    wait_for_emulator() {
+        local bootcheck=0
+        local timeout=300  # 5 minutes
+        local interval=5
+
+        while [ $bootcheck -lt $timeout ]; do
+            if adb shell "getprop sys.boot_completed" 2>/dev/null | grep -q "1"; then
+                return 0
+            fi
+            sleep $interval
+            bootcheck=$((bootcheck + interval))
+        done
+        return 1
+    }
+
     # Wait for emulator to boot
     echo "Waiting for emulator to boot..."
 
-    # Timeout after 5 minutes (300 seconds)
-    timeout 300 bash -c '
-        while true; do
-            if adb shell "getprop sys.boot_completed" 2>/dev/null | grep -q "1"; then
-                exit 0
-            fi
-            sleep 5
-        done
-    '
-
-    if [ $? -eq 0 ]; then
+    if wait_for_emulator; then
         print_status "Emulator booted successfully"
         return 0
     else
