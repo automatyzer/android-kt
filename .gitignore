@@ -1,5 +1,6 @@
 .idea
 .env
+build.gradle.backup
 # Compiled class file
 *.class
 

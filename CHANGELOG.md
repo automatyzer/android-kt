@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2025-04-20
+
+### Added
+- Changes in build.gradle
+- Changes in gradlew
+- Changes in gradlew.bat
+- Changes in install/android.sh
+- Changes in install/fedora.sh
+- Changes in install/java.sh
+- Changes in scripts/config.sh
+- Changes in scripts/gradlew_template
+- Changes in scripts/setup_env.sh
+- Changes in scripts/start.sh
+- Changes in settings.gradle
+- Changes in start/android.sh
+
 ## [0.1.4] - 2025-04-20
 
 ### Added
